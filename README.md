@@ -7,10 +7,10 @@ Eğitmenlerin quiz oluşturabildiği, öğrencilerin quiz çözebildiği basit v
 
 ##  Proje Ekibi
 
-- **Berat** 
-- **Eymen** 
-- **Kerem** 
-- **Alperen** 
+- **Şevket Berat Tetik** 
+- **Muhammed Eymen Yiğit** 
+- **Mustafa Kerem Yiğit** 
+- **Alperen Örene** 
 
 ---
 
