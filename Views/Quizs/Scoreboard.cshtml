@@ -1,0 +1,51 @@
+@model IEnumerable<SoruDeneme.Models.QuizAttempt>
+
+@{
+    var quiz = ViewBag.Quiz as SoruDeneme.Models.Quiz;
+}
+
+<div class="container mt-4">
+    <h2>Skor Tablosu</h2>
+
+    @if (quiz != null)
+    {
+        <p class="text-muted">
+            <strong>Quiz:</strong> @quiz.QuizName
+        </p>
+    }
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Öðrenci</th>
+                <th>Doðru</th>
+                <th>Yanlýþ</th>
+                <th>Boþ</th>
+                <th>Toplam</th>
+                <th>Bittiði Zaman</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                var answered = (a.Answers == null)
+                    ? 0
+                    : a.Answers.Select(x => x.QuestionId).Distinct().Count();
+
+                var blank = a.TotalQuestions - answered;
+                var wrong = answered - a.CorrectCount;
+
+                <tr>
+                    <td>@(a.User?.Username ?? "Bilinmiyor")</td>
+                    <td>@a.CorrectCount</td>
+                    <td>@wrong</td>
+                    <td>@blank</td>
+                    <td>@a.TotalQuestions</td>
+                    <td>@(a.FinishedAt.HasValue ? a.FinishedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm") : "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a asp-action="Index" class="btn btn-secondary">Sýnavlara Dön</a>
+</div>

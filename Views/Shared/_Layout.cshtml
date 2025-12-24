@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="tr" class="h-100">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>@ViewData["Title"] - QuizApp</title>
+
+		<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+		<style>
+			body { display:flex; flex-direction:column; min-height:100vh; }
+			main { flex:1; }
+			.navbar-divider { border-left: 1px solid #dee2e6; height: 24px; margin: 0 15px; align-self: center; }
+		</style>
+	</head>
+
+	<body class="h-100">
+		<header>
+			@{
+			var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+			var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+			bool isLoginPage = (currentController == "Login" && currentAction == "Index");
+
+			string destController = "Login";
+			string destAction = "Index";
+
+			string userRole = Context.Session.GetString("UserRole") ?? "";
+			string username = Context.Session.GetString("Username") ?? "";
+
+			if (!string.IsNullOrEmpty(userRole))
+			{
+			if (userRole == "Egitmen") { destController = "Home"; destAction = "EgitmenHome"; }
+			else if (userRole == "Ogrenci") { destController = "Home"; destAction = "OgrenciHome"; }
+			}
+			}
+
+			@if (!isLoginPage)
+			{
+			<nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow mb-4 py-3">
+				<div class="container-fluid d-flex justify-content-start align-items-center">
+
+					<a class="navbar-brand fw-bold fs-3 text-dark"
+					   asp-controller="@destController" asp-action="@destAction">
+						QuizApp
+					</a>
+
+					<span class="navbar-divider" style="height: 28px;"></span>
+
+					<ul class="navbar-nav">
+						@if (!string.IsNullOrEmpty(userRole))
+						{
+						<li class="nav-item">
+							<a class="nav-link text-dark fs-5" asp-controller="Quizs" asp-action="Index">Sınavlar</a>
+						</li>
+						<li class="nav-item">
+							<span class="navbar-divider" style="height: 22px;"></span>
+						</li>
+						}
+					</ul>
+
+					@if (!string.IsNullOrEmpty(userRole))
+					{
+					<ul class="navbar-nav ms-auto">
+						<li class="nav-item">
+							<span class="nav-link fw-semibold fs-5 text-dark me-3">@username</span>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-danger fs-5" asp-controller="Login" asp-action="Logout">Çıkış</a>
+						</li>
+					</ul>
+					}
+				</div>
+			</nav>
+			}
+		</header>
+
+		<main role="main" class="pb-3">
+			<div class="container">
+				@RenderBody()
+			</div>
+		</main>
+
+		<footer class="footer mt-auto py-3 bg-white border-top">
+			<div class="container text-center">
+				<span class="text-muted">© 2025 - QuizApp</span>
+			</div>
+		</footer>
+
+		<script src="~/lib/jquery/dist/jquery.min.js"></script>
+		<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="~/js/site.js" asp-append-version="true"></script>
+		@await RenderSectionAsync("Scripts", required: false)
+
+	</body>
+</html>

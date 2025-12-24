@@ -1,0 +1,94 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>QuizApp - Giriş</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-scale { transform: scale(1.8); transform-origin: center; }
+
+        .login-card {
+            width: 360px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            background: #fff;
+            padding: 22px;
+        }
+
+        .role-pill {
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            padding: 8px 12px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .role-pill input { margin-right: 8px; }
+    </style>
+</head>
+<body>
+<div class="login-scale">
+    <div class="login-card">
+        <div class="text-center mb-3">
+            <h2 class="fw-bold mb-1">QuizApp</h2>
+            <div class="text-muted">Giriş Yap</div>
+        </div>
+
+        <form method="post" asp-controller="Login" asp-action="Login">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="role-pill d-flex align-items-center justify-content-center">
+                        <input type="radio" name="userType" value="Egitmen" required checked>
+                        Eğitmen
+                    </label>
+                </div>
+                <div class="col-6">
+                    <label class="role-pill d-flex align-items-center justify-content-center">
+                        <input type="radio" name="userType" value="Ogrenci">
+                        Öğrenci
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <input class="form-control form-control-lg" type="text" name="username" placeholder="Kullanıcı Adı" required autocomplete="off" />
+            </div>
+
+            <div class="mb-3">
+                <input class="form-control form-control-lg" type="password" name="password" placeholder="Şifre" required />
+            </div>
+
+            <button class="btn btn-primary btn-lg w-100" type="submit">Giriş Yap</button>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger mt-3 mb-0" style="font-size:14px;">
+                    @ViewBag.Error
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

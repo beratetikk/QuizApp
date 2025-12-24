@@ -1,0 +1,387 @@
+﻿@model SoruDeneme.Models.ViewModels.CreateQuizViewModel
+
+@{
+    ViewData["Title"] = "Yeni Sınav Oluştur";
+    var questionCount = Model.Questions?.Count ?? 0;
+    bool canFinish = questionCount > 0;
+}
+
+<style>
+    .page-scale {
+        transform: none;
+        width: 100%;
+        margin-bottom: 60px;
+    }
+
+    input, textarea, select { max-width: 100%; }
+
+    .qimg {
+        max-width: 320px;
+        max-height: 220px;
+        object-fit: contain;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 6px;
+        background: white;
+    }
+
+    .q-text-wrap {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .table-fixed {
+        table-layout: fixed;
+        width: 100%;
+    }
+    .table-fixed td, .table-fixed th {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+</style>
+
+<div class="page-scale">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+
+                @if (TempData["WizardSuccess"] != null)
+                {
+                    <div class="alert alert-success">@TempData["WizardSuccess"]</div>
+                }
+                @if (TempData["WizardError"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["WizardError"]</div>
+                }
+
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">
+                            @(Model.QuizCreated ? "Quiz Oluşturuldu (Soruları Ekleyin)" : "Yeni Sınav Oluştur")
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form asp-action="Create" method="post">
+                            @Html.AntiForgeryToken()
+
+                            @if (!Model.QuizCreated)
+                            {
+                                <input type="hidden" name="step" value="createQuiz" />
+                            }
+
+                            <input type="hidden" asp-for="Quiz.Id" />
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Quiz.QuizName" class="control-label fw-bold">Sınav Adı</label>
+                                    <input asp-for="Quiz.QuizName"
+                                           class="form-control"
+                                           maxlength="40"
+                                           readonly="@(Model.QuizCreated ? "readonly" : null)" />
+                                    <div class="text-muted small">Maks: 40 karakter</div>
+                                    <span asp-validation-for="Quiz.QuizName" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Quiz.Genre" class="control-label fw-bold">Tür / Kategori</label>
+                                    <input asp-for="Quiz.Genre"
+                                           class="form-control"
+                                           maxlength="25"
+                                           readonly="@(Model.QuizCreated ? "readonly" : null)" />
+                                    <div class="text-muted small">Maks: 25 karakter</div>
+                                    <span asp-validation-for="Quiz.Genre" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Quiz.TimeLimitMinutes" class="control-label fw-bold">Süre (dakika) - boş bırakılabilir</label>
+                                    <input asp-for="Quiz.TimeLimitMinutes" type="number" class="form-control" min="1"
+                                           readonly="@(Model.QuizCreated ? "readonly" : null)" />
+                                    <span asp-validation-for="Quiz.TimeLimitMinutes" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Erişim</label>
+
+                                    @if (!Model.QuizCreated)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="Quiz.IsPublic" value="true" checked id="pub">
+                                            <label class="form-check-label" for="pub">Public (herkes görebilir)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="Quiz.IsPublic" value="false" id="priv">
+                                            <label class="form-check-label" for="priv">Kodlu (sadece kod bilen)</label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted">
+                                            <strong>@(Model.Quiz.IsPublic ? "Public" : "Kodlu")</strong>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Quiz.AccessCode" class="control-label fw-bold">Quiz Kodu (Kodlu ise zorunlu)</label>
+                                    <input asp-for="Quiz.AccessCode"
+                                           class="form-control"
+                                           placeholder="Örn: ABC123"
+                                           id="accessCodeInput"
+                                           maxlength="20"
+                                           readonly="@(Model.QuizCreated ? "readonly" : null)" />
+                                    <div class="text-muted small">Maks: 20 karakter</div>
+                                    <span asp-validation-for="Quiz.AccessCode" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-4">
+                                @if (!Model.QuizCreated)
+                                {
+                                    <button type="submit" class="btn btn-success btn-lg">Quiz Oluştur</button>
+                                    <a asp-action="Index" class="btn btn-secondary btn-lg">Listeye Geri Dön</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Index" class="btn btn-secondary">Listeye Dön</a>
+                                }
+                            </div>
+                        </form>
+
+                        @if (Model.QuizCreated)
+                        {
+                            <hr class="my-4" />
+
+                            <div class="row g-4">
+                                <div class="col-lg-7">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <strong>Eklenen Sorular</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (Model.Questions == null || !Model.Questions.Any())
+                                            {
+                                                <div class="text-muted">Henüz soru eklenmedi.</div>
+                                            }
+                                            else
+                                            {
+                                                <table class="table table-sm align-middle table-fixed">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:70px;">No</th>
+                                                            <th>Soru</th>
+                                                            <th style="width:120px;" class="text-end">İşlem</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var q in Model.Questions.OrderBy(x => x.QuestionNum))
+                                                        {
+                                                            <tr>
+                                                                <td>@q.QuestionNum</td>
+                                                                <td class="q-text-wrap">
+                                                                    <div class="fw-bold q-text-wrap">@q.Text</div>
+
+                                                                    @if (!string.IsNullOrEmpty(q.ImagePath))
+                                                                    {
+                                                                        <div class="mt-2">
+                                                                            <img src="@q.ImagePath" class="qimg" />
+                                                                        </div>
+                                                                    }
+
+                                                                    <div class="text-muted small mt-1">
+                                                                        Doğru: <strong>@q.CorrectOption</strong>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-end">
+                                                                   <form asp-action="DeleteQuestion" method="post" class="d-inline">
+                                                              @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@Model.Quiz.Id" />
+                                                              <input type="hidden" name="questionId" value="@q.Id" />
+                                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                                              onclick="return confirm('Bu soruyu silmek istiyor musun?');">
+                                                                            Sil
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-5">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-success text-white">
+                                            <strong>+ Soru Ekle</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="step" value="addQuestion" />
+                                                <input type="hidden" asp-for="Quiz.Id" value="@Model.Quiz.Id" />
+
+                                                <div class="mb-2">
+                                                    <label class="fw-bold">Soru No</label>
+                                                    <input asp-for="NewQuestion.QuestionNum" class="form-control" type="number" min="1" />
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="fw-bold">Soru Metni</label>
+                                                    <textarea asp-for="NewQuestion.Text" class="form-control" rows="3"></textarea>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="fw-bold">Resim (opsiyonel)</label>
+                                                    <input type="file" name="imageFile" class="form-control" accept="image/*" />
+                                                    <div class="text-muted small">PNG/JPG önerilir.</div>
+                                                </div>
+
+                                                <div class="row g-2 mt-1">
+                                                    <div class="col-6">
+                                                        <label>A</label>
+                                                        <input asp-for="NewQuestion.ChoiceA" class="form-control opt-input" data-opt="A" />
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label>B</label>
+                                                        <input asp-for="NewQuestion.ChoiceB" class="form-control opt-input" data-opt="B" />
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label>C</label>
+                                                        <input asp-for="NewQuestion.ChoiceC" class="form-control opt-input" data-opt="C" />
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label>D</label>
+                                                        <input asp-for="NewQuestion.ChoiceD" class="form-control opt-input" data-opt="D" />
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label>E</label>
+                                                        <input asp-for="NewQuestion.ChoiceE" class="form-control opt-input" data-opt="E" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <label class="fw-bold">Doğru Şık</label>
+                                                    <select asp-for="NewQuestion.CorrectOption" class="form-select" id="correctSelect" required>
+                                                        <option value="">Seçiniz...</option>
+                                                    </select>
+                                                    <div class="text-muted small mt-1">
+                                                        Sadece doldurduğun şıklar listede görünür.
+                                                    </div>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-success w-100 mt-3">
+                                                    Soruyu Ekle
+                                                </button>
+
+                                                @if (canFinish)
+                                                {
+                                                    <a asp-action="Index" class="btn btn-secondary w-100 mt-2">
+                                                        Bitir (Listeye Dön)
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-secondary w-100 mt-2" disabled
+                                                            title="En az 1 soru eklemeden quiz tamamlanamaz.">
+                                                        Bitir (Listeye Dön)
+                                                    </button>
+                                                    <div class="text-danger small mt-2">
+                                                        Quiz’i tamamlamak için en az 1 soru eklemelisin.
+                                                    </div>
+                                                }
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @if (!Model.QuizCreated)
+    {
+        <script>
+            (function () {
+                const pub = document.getElementById("pub");
+                const priv = document.getElementById("priv");
+                const code = document.getElementById("accessCodeInput");
+
+                function sync() {
+                    if (!code || !pub) return;
+                    const isPublic = pub.checked;
+                    code.disabled = isPublic;
+                    if (isPublic) code.value = "";
+                }
+
+                if (pub) pub.addEventListener("change", sync);
+                if (priv) priv.addEventListener("change", sync);
+                sync();
+            })();
+        </script>
+    }
+
+    @if (Model.QuizCreated)
+    {
+        <script>
+            (function () {
+                const inputs = document.querySelectorAll(".opt-input");
+                const select = document.getElementById("correctSelect");
+
+                function rebuildSelect() {
+                    if (!select) return;
+
+                    const old = select.value;
+
+                    select.innerHTML = "";
+                    const first = document.createElement("option");
+                    first.value = "";
+                    first.textContent = "Seçiniz...";
+                    select.appendChild(first);
+
+                    let filledCount = 0;
+                    inputs.forEach(inp => {
+                        const opt = inp.getAttribute("data-opt");
+                        const val = (inp.value || "").trim();
+                        if (val.length > 0) {
+                            filledCount++;
+                            const o = document.createElement("option");
+                            o.value = opt;
+                            o.textContent = opt;
+                            select.appendChild(o);
+                        }
+                    });
+
+                    const stillExists = Array.from(select.options).some(o => o.value === old);
+                    select.value = stillExists ? old : "";
+
+                    if (filledCount < 2) {
+                        select.setCustomValidity("En az 2 şık doldurmalısın.");
+                    } else {
+                        select.setCustomValidity("");
+                    }
+                }
+
+                inputs.forEach(i => i.addEventListener("input", rebuildSelect));
+                rebuildSelect();
+            })();
+        </script>
+    }
+}

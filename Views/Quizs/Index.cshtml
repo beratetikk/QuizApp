@@ -1,0 +1,177 @@
+﻿@model IEnumerable<SoruDeneme.Models.Quiz>
+
+@{
+    ViewData["Title"] = "Sınavlar";
+    var role = Context.Session.GetString("UserRole"); // "Egitmen" / "Ogrenci"
+}
+
+<style>
+    .table-responsive { overflow-x: auto; }
+
+    .actions-cell { white-space: nowrap; }
+
+    /* Butonlar tek satır dursun */
+    .actions-wrap {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        gap: .35rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .actions-wrap .btn { white-space: nowrap; }
+
+    /* Access badge */
+    .badge-soft {
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        background: #fff;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="display-6 fw-bold text-primary">SINAVLAR</h1>
+
+        @if (role == "Egitmen")
+        {
+            <a asp-action="Create" class="btn btn-success">
+                + Yeni Sınav Oluştur
+            </a>
+        }
+    </div>
+
+    @if (role == "Ogrenci")
+    {
+        if (TempData["UnlockSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["UnlockSuccess"]</div>
+        }
+        if (TempData["UnlockError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["UnlockError"]</div>
+        }
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="fw-bold mb-2">Kodlu Sınav Aç</div>
+
+                <form asp-action="UnlockByCode" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="text"
+                           name="accessCode"
+                           class="form-control"
+                           placeholder="Kod gir (örn: ABC123)"
+                           autocomplete="off"
+                           maxlength="20" />
+                    <button type="submit" class="btn btn-primary">
+                        Kodu Aç
+                    </button>
+                </form>
+
+                <div class="text-muted small mt-2">
+                    Kod doğruysa sınav listede görünür ve başlatılabilir.
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover shadow-sm border rounded align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Sınav Adı</th>
+                    <th>Tür / Kategori</th>
+                    <th style="width:110px;">Süre</th>
+                    <th style="width:110px;">Erişim</th>
+                    <th class="text-end" style="width:360px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.QuizName</td>
+                        <td>@(item.Genre ?? "-")</td>
+                        <td>
+                            @(item.TimeLimitMinutes.HasValue && item.TimeLimitMinutes.Value > 0
+                                ? item.TimeLimitMinutes.Value + " dk"
+                                : "-")
+                        </td>
+                        <td>
+                            @if (item.IsPublic)
+                            {
+                                <span class="badge-soft">Public</span>
+                            }
+                            else
+                            {
+                                <span class="badge-soft">Kodlu</span>
+                            }
+                        </td>
+
+                        <td class="text-end actions-cell">
+                            @if (role == "Ogrenci")
+                            {
+                                <div class="actions-wrap">
+                                    <a asp-action="Solve"
+                                       asp-route-quizId="@item.Id"
+                                       asp-route-order="0"
+                                       class="btn btn-sm btn-success">
+                                        Başlat
+                                    </a>
+                                </div>
+                            }
+
+                            @if (role == "Egitmen")
+                            {
+                                <div class="actions-wrap">
+                                    <a asp-action="Create"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-primary">
+                                        Soruları Düzenle
+                                    </a>
+
+                                    <a asp-action="Scoreboard"
+                                       asp-route-quizId="@item.Id"
+                                       class="btn btn-sm btn-dark">
+                                        Skorlar
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-warning text-white">
+                                        Düzenle
+                                    </a>
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-info text-white">
+                                        Detaylar
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-danger">
+                                        Sil
+                                    </a>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (string.IsNullOrEmpty(role))
+    {
+        <div class="alert alert-warning mt-3">
+            Devam etmek için giriş yapmalısınız.
+        </div>
+    }
+</div>

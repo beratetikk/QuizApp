@@ -1,0 +1,90 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>QuizApp - Giriş</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            width: 320px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+            .login-container input[type="text"], .login-container input[type="password"], .login-container button {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 10px;
+                margin: 8px 0;
+            }
+
+        .roles {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+            .roles label {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+        .login-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>QuizApp Giriş</h2>
+
+        <form method="post" action="/Home/Index">
+
+            <div class="roles">
+                <label>
+                    <input type="radio" name="userType" value="Egitmen" required checked>
+                    Eğitmen
+                </label>
+
+                <label>
+                    <input type="radio" name="userType" value="Ogrenci">
+                    Öğrenci
+                </label>
+            </div>
+
+            <input type="text" name="Isim" placeholder="İsim" required>
+            <input type="password" name="Sifre" placeholder="Şifre" required>
+
+            <button type="submit">Giriş Yap</button>
+        </form>
+
+        @if (TempData["Error"] != null)
+        {
+            <p style="color:red; font-size:13px; margin-top:10px;">@TempData["Error"]</p>
+        }
+    </div>
+
+</body>
+</html>

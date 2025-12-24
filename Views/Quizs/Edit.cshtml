@@ -1,0 +1,65 @@
+﻿@model SoruDeneme.Models.Quiz
+
+@{
+    ViewData["Title"] = "Sınavı Düzenle";
+}
+
+<style>
+    .page-scale {
+        transform: scale(1.3);
+        transform-origin: top center;
+        width: 100%;
+        margin-bottom: 150px;
+    }
+</style>
+
+<div class="page-scale">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-white">
+                        <h3 class="card-title mb-0">Sınavı Düzenle</h3>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Edit" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="QuizName" class="control-label fw-bold">Sınav Adı</label>
+                                <input asp-for="QuizName" class="form-control" maxlength="40" />
+                                <div class="text-muted small">Maks: 40 karakter</div>
+                                <span asp-validation-for="QuizName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="Genre" class="control-label fw-bold">Tür / Kategori</label>
+                                <input asp-for="Genre" class="form-control" maxlength="25" />
+                                <div class="text-muted small">Maks: 25 karakter</div>
+                                <span asp-validation-for="Genre" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <input type="submit" value="Değişiklikleri Kaydet" class="btn btn-warning text-white btn-lg" />
+                                <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
